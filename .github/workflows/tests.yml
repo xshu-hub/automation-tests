@@ -25,7 +25,8 @@ jobs:
       - if: runner.os == 'Linux'
         run: npx playwright install-deps chromium
       - run: npm run check
-      - run: npm test -- -- --workers=2
+      # Invoke directly: some Windows/npm versions consume the extra separator.
+      - run: node --import tsx scripts/run.ts -- --workers=2
       - run: npm run verify:state
       - run: npm run verify:failure
       - run: npm run verify:interrupt
