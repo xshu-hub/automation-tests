@@ -32,6 +32,8 @@
 
 以上是本轮本地结果，远端 CI 以对应提交的 Actions 运行记录为准。真实业务接入、长期稳定性、复杂 UI 库适配及所有公开方法的专项运行覆盖仍未完成。
 
+提交 4bea104 的 [Actions 42111124996](https://github.com/xshu-hub/automation-tests/actions/runs/42111124996) 四个组合已全部通过。该运行提示 checkout@v4/setup-node@v4 的 Node 20 Action 运行时弃用，后续维护改动将两者更新至官方 Node 24 运行时的 v5，保持被测 Node 版本矩阵不变；维护提交的结果以其独立运行记录为准。
+
 ## 未发布：多系统、具名会话与嵌入视图（2026-11-06）
 
 本次在 Windows 11 22631、Node 22.23.4、npm 10.9.9、Playwright Test 1.64.1 执行，使用 Playwright 安装的 Chromium 156.0.8078.4（revision 1248）。未触发远端 CI，以下是当前工作区的本地结果。

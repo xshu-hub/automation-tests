@@ -8,6 +8,8 @@
 
 为 lint 工具链的间接依赖增加 minimatch 11.0.1 override，修复 GHSA-g3hv-75wg-m249；直接依赖版本不变。上游支持修复版本后应复核并移除此兼容 override。
 
+CI 的 checkout/setup-node 更新为使用 Node 24 Action 运行时的 v5；测试矩阵仍为 Windows/Ubuntu × Node 22.13.0/24。
+
 # 0.1.1
 
 修复 Windows 启动器用 child.kill('SIGINT') 强制结束 Playwright、跳过 teardown 的问题。首次中断改用本地 IPC 请求清理，重复中断或超时才回收本次拥有的进程树。Linux 保留原生 SIGINT，并隔离和枚举拥有的进程组以供强制回收。
