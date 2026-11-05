@@ -4,7 +4,19 @@ import { FAILURE_TITLE, CLEANUP_TITLE, FAILURE_MARKER } from '../failure-report'
 import type { Item } from '../../targets/demo/test-data/items';
 
 // Executed ONLY by npm run verify:failure. A deliberate failure checks real reporting/teardown.
-test(FAILURE_TITLE, async ({ cleanup, createItem, itemsApi, itemsPage }, testInfo) => {
+test(FAILURE_TITLE, async ({ cleanup, createItem, itemsApi, itemsPage, apiSessions, browserSessions }, testInfo) => {
+  const namedApi = await apiSessions.create('failure-api', { system: 'secondary', identity: 'admin' });
+  const namedBrowser = await browserSessions.create('failure-browser', { system: 'secondary', identity: 'reader' });
+  const namedPage = await namedBrowser.newPage();
+  await namedPage.goto('/items');
+  await expect(namedPage.getByTestId('current-user')).toHaveText('reader');
+  browserSessions.cleanup.defer('named resources remain usable after failure', async () => {
+    expect((await namedApi.api.get('me')).status()).toBe(200);
+    await expect(namedPage.getByTestId('current-user')).toHaveText('reader');
+    const proof = testInfo.outputPath('sessions-cleanup-verified.json');
+    await writeFile(proof, JSON.stringify({ apiAlive: true, pageAlive: true }));
+    await testInfo.attach('sessions-cleanup-verified', { path: proof, contentType: 'application/json' });
+  });
   const probe: { item?: Item } = {};
   // LIFO: this proof runs AFTER createItem's deletion, registered later.
   cleanup.defer('verify cleanup after the failed assertion', async () => {

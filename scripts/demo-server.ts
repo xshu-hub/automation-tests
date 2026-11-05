@@ -4,7 +4,7 @@ import { demoPlayground } from './demo-playground';
 
 interface Item { id: string; title: string; owner: string }
 const items = new Map<string, Item>();
-const port = 4173;
+const port = Number(process.env.DEMO_PORT || 4173);
 
 function send(response: ServerResponse, status: number, body: unknown): void {
   response.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' });
@@ -83,6 +83,11 @@ const server = createServer(async (request, response) => {
     const user = actor(request);
     if (!user) return send(response, 401, { error: 'unauthorized' });
     if (path === '/api/me') return send(response, 200, { user });
+    if (path === '/api/echo') {
+      if (request.method === 'HEAD') { response.writeHead(200, { 'X-Demo-Method': 'HEAD' }); response.end(); return; }
+      const content = (await body(request)).toString();
+      return send(response, 200, { method: request.method, contentType: request.headers['content-type'], content });
+    }
     if (path === '/api/plain-text') {
       response.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' });
       response.end('sensitive-body-demo-value'); return;

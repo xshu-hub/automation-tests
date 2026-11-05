@@ -5,6 +5,27 @@ export interface PlaygroundResponse {
 
 /** Local DOM contracts for foundation/component verification; no login or external service. */
 export function demoPlayground(pathname: string): PlaygroundResponse | undefined {
+  if (pathname === '/frames') {
+    return { status: 200, body: `<!doctype html><title>Nested frame probe</title>
+      <h1>嵌入工作台</h1><label>审批意见<input></label><button>提交</button>
+      <iframe title="业务工作区" src="/frames/outer"></iframe>
+      <iframe title="备用工作区" src="/frames/inner"></iframe>` };
+  }
+  if (pathname === '/frames/outer') {
+    return { status: 200, body: `<!doctype html><h2>业务工作区</h2>
+      <button id="load">加载审批</button><button id="replace">重建审批</button><section id="slot"></section>
+      <script>
+      function load(){const frame=document.createElement('iframe');frame.title='审批内容';
+        frame.src='http://127.0.0.1:4174/frames/inner';document.querySelector('#slot').replaceChildren(frame);}
+      document.querySelector('#load').onclick=load;document.querySelector('#replace').onclick=load;
+      </script>` };
+  }
+  if (pathname === '/frames/inner') {
+    return { status: 200, body: `<!doctype html><h2>审批表单</h2>
+      <form aria-label="审批表单"><label>审批意见<input name="opinion"></label><button>提交</button><output role="status"></output></form>
+      <table aria-label="审核记录"><tr><th>人员</th><th>状态</th></tr><tr><td>Alice</td><td>待审批</td></tr></table>
+      <script>document.querySelector('form').onsubmit=e=>{e.preventDefault();document.querySelector('output').textContent=e.target.elements.opinion.value;};</script>` };
+  }
   if (pathname === '/playground/error') {
     return { status: 500, body: '<!doctype html><html lang="en"><body><h1>Example server error</h1></body></html>' };
   }

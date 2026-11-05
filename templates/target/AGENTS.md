@@ -8,6 +8,8 @@
 - 不实现 MCP、SSO、Token 获取或刷新。
 - 数据准备与清理使用 fixtures；每条用例使用唯一数据，创建后及时登记清理。
 - 页面与接口封装只提取已经重复的业务操作。
+- 多角色使用 apiSessions/browserSessions，附加系统在输入 systems 中声明；页面相关清理放 browserSessions.cleanup，API 清理放 apiSessions.cleanup。
+- 多层 iframe 使用 FrameLocator + BaseView，明确每层作用域及业务就绪条件。
 - 修改后执行目标用例；地址、角色不明确时从外部工具获取后更新运行输入。
 
 ## 项目业务说明

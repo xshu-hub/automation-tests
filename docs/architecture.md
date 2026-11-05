@@ -6,6 +6,7 @@
 | shared/input | 校验及读取外部 JSON、状态文件 | Zod、文件系统 |
 | shared/auth | 浏览器状态注入 | Playwright |
 | shared/fixtures | 独立浏览器/API 上下文、身份、清理 | 输入、注入、通用工具 |
+| shared/sessions | 单条用例的具名角色上下文、业务清理及资源释放 | 输入、API、状态注入、原生 browser/request |
 | 项目 pages/api | 实际业务操作和请求 | 原生 Playwright、ApiClient |
 | 项目 fixtures | 项目页面对象、数据工厂和清理 | 基础 fixtures、业务封装 |
 | tests | 场景、步骤、断言 | 本项目 fixtures |
@@ -15,4 +16,6 @@
 
 运行输入由地址和状态共同组成，可切换环境而无需复制测试。报告以目标、环境、运行批次隔离。
 
-目前只建立实际需要的层。跨项目业务流程出现时，可增加 integrations/<flow> 独立配置，复用各项目公开的页面/接口客户端；不通过导入其他项目的 spec 文件串联测试。
+跨系统流程目前归属于一个明确的 targets/<flow> 目录，systems 输入声明参与系统；复用各项目公开的页面/API 类，不通过导入其他项目的 spec 或整套 fixture 串联测试。CLI 保持 targets/<id> 入口，shared 不依赖 targets。
+
+默认 fixtures 兼容单系统用法。apiSessions 不依赖 browser，因此 API-only 不启动 Chromium；browserSessions 显式依赖 apiSessions，使浏览器相关清理执行时具名 API 仍可用。每个管理器先逆序业务清理，再逆序关闭资源，收集错误后报告。FrameLocator 与 BaseView 组合嵌入区域，不改变身份或浏览器会话。

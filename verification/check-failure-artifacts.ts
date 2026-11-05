@@ -32,6 +32,11 @@ assert.ok(typeof created.id === 'string' && created.id.length > 0, 'No resource 
 assert.equal(removed.id, created.id, 'Cleanup proof refers to a different resource.');
 assert.equal(removed.removed, true);
 assert.equal((await proof(cleanup, 'post-cleanup-verified')).remaining, 0);
+const sessionsProof = await proof(failure, 'sessions-cleanup-verified');
+assert.equal(sessionsProof.apiAlive, true);
+assert.equal(sessionsProof.pageAlive, true);
+assert.ok(failure.attachments.filter(attachment => attachment.name === 'screenshot').length >= 2,
+  'The default and named browser pages must both have native failure screenshots.');
 const entries = await readdir(output, { recursive: true });
 assert.ok(entries.some((file) => file.endsWith('.png')), 'Failure screenshot missing');
 assert.ok(entries.some((file) => file.endsWith('trace.zip')), 'Failure trace missing');

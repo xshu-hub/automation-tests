@@ -24,6 +24,7 @@ test('concurrent generators reserve a target once and produce a usable substitut
   assert.match(await readFile(resolve(destination, 'playwright.config.ts'), 'utf8'), /id: 'crm'/);
   assert.match(await readFile(resolve(destination, 'README.md'), 'utf8'), /--target crm/);
   assert.equal(JSON.parse(await readFile(resolve(destination, 'runtime.input.example.json'), 'utf8')).target, 'crm');
+  assert.equal(JSON.parse(await readFile(resolve(destination, 'runtime.multi-system.input.example.json'), 'utf8')).target, 'crm');
   for (const directory of ['tests/api', 'tests/web', 'fixtures', 'pages', 'api', 'test-data', 'specs']) {
     assert.ok((await stat(resolve(destination, directory))).isDirectory());
   }

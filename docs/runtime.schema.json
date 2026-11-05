@@ -2,14 +2,6 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "type": "object",
   "properties": {
-    "target": {
-      "type": "string",
-      "pattern": "^[a-z0-9][a-z0-9-]*$"
-    },
-    "environment": {
-      "type": "string",
-      "pattern": "^[a-zA-Z0-9_-]+$"
-    },
     "webBaseURL": {
       "type": "string",
       "pattern": "^https?:\\/\\/[^/?#@\\\\]+(?:\\/[^?#]*)?$"
@@ -115,8 +107,7 @@
                             "required": [
                               "name",
                               "value"
-                            ],
-                            "additionalProperties": false
+                            ]
                           }
                         }
                       },
@@ -252,8 +243,7 @@
                                 "required": [
                                   "name",
                                   "value"
-                                ],
-                                "additionalProperties": false
+                                ]
                               }
                             }
                           },
@@ -273,23 +263,311 @@
                   }
                 ]
               }
-            },
-            "required": [
-              "headers"
-            ],
-            "additionalProperties": false
+            }
           },
           "expiresAt": {
             "type": "string",
             "format": "date-time",
             "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
           }
+        }
+      }
+    },
+    "target": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]*$"
+    },
+    "environment": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9_-]+$"
+    },
+    "systems": {
+      "default": {},
+      "type": "object",
+      "propertyNames": {
+        "type": "string",
+        "pattern": "^(?!default$)[a-z0-9][a-z0-9-]{0,127}$"
+      },
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "webBaseURL": {
+            "type": "string",
+            "pattern": "^https?:\\/\\/[^/?#@\\\\]+(?:\\/[^?#]*)?$"
+          },
+          "apiBaseURL": {
+            "type": "string",
+            "pattern": "^https?:\\/\\/[^/?#@\\\\]+(?:\\/[^?#]*)?$"
+          },
+          "defaultIdentity": {
+            "default": "default",
+            "type": "string",
+            "minLength": 1
+          },
+          "identities": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string",
+              "minLength": 1
+            },
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "storageState": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "cookies": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "name": {
+                                "type": "string"
+                              },
+                              "value": {
+                                "type": "string"
+                              },
+                              "domain": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "path": {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              "expires": {
+                                "type": "number"
+                              },
+                              "httpOnly": {
+                                "type": "boolean"
+                              },
+                              "secure": {
+                                "type": "boolean"
+                              },
+                              "sameSite": {
+                                "type": "string",
+                                "enum": [
+                                  "Strict",
+                                  "Lax",
+                                  "None"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "name",
+                              "value",
+                              "domain",
+                              "path",
+                              "expires",
+                              "httpOnly",
+                              "secure",
+                              "sameSite"
+                            ],
+                            "additionalProperties": {}
+                          }
+                        },
+                        "origins": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "origin": {
+                                "type": "string",
+                                "pattern": "^https?:\\/\\/[^/?#@\\\\]+\\/?$"
+                              },
+                              "localStorage": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "name": {
+                                      "type": "string"
+                                    },
+                                    "value": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "name",
+                                    "value"
+                                  ]
+                                }
+                              }
+                            },
+                            "required": [
+                              "origin",
+                              "localStorage"
+                            ],
+                            "additionalProperties": {}
+                          }
+                        }
+                      },
+                      "required": [
+                        "cookies",
+                        "origins"
+                      ],
+                      "additionalProperties": {}
+                    }
+                  ]
+                },
+                "sessionStorage": {
+                  "default": {},
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string",
+                    "pattern": "^https?:\\/\\/[^/?#@\\\\]+\\/?$"
+                  },
+                  "additionalProperties": {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "api": {
+                  "default": {
+                    "headers": {}
+                  },
+                  "type": "object",
+                  "properties": {
+                    "headers": {
+                      "default": {},
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {
+                        "type": "string"
+                      }
+                    },
+                    "storageState": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "cookies": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "value": {
+                                    "type": "string"
+                                  },
+                                  "domain": {
+                                    "type": "string",
+                                    "minLength": 1
+                                  },
+                                  "path": {
+                                    "type": "string",
+                                    "minLength": 1
+                                  },
+                                  "expires": {
+                                    "type": "number"
+                                  },
+                                  "httpOnly": {
+                                    "type": "boolean"
+                                  },
+                                  "secure": {
+                                    "type": "boolean"
+                                  },
+                                  "sameSite": {
+                                    "type": "string",
+                                    "enum": [
+                                      "Strict",
+                                      "Lax",
+                                      "None"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "name",
+                                  "value",
+                                  "domain",
+                                  "path",
+                                  "expires",
+                                  "httpOnly",
+                                  "secure",
+                                  "sameSite"
+                                ],
+                                "additionalProperties": {}
+                              }
+                            },
+                            "origins": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "origin": {
+                                    "type": "string",
+                                    "pattern": "^https?:\\/\\/[^/?#@\\\\]+\\/?$"
+                                  },
+                                  "localStorage": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "object",
+                                      "properties": {
+                                        "name": {
+                                          "type": "string"
+                                        },
+                                        "value": {
+                                          "type": "string"
+                                        }
+                                      },
+                                      "required": [
+                                        "name",
+                                        "value"
+                                      ]
+                                    }
+                                  }
+                                },
+                                "required": [
+                                  "origin",
+                                  "localStorage"
+                                ],
+                                "additionalProperties": {}
+                              }
+                            }
+                          },
+                          "required": [
+                            "cookies",
+                            "origins"
+                          ],
+                          "additionalProperties": {}
+                        }
+                      ]
+                    }
+                  }
+                },
+                "expiresAt": {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+                }
+              }
+            }
+          }
         },
         "required": [
-          "sessionStorage",
-          "api"
-        ],
-        "additionalProperties": false
+          "webBaseURL",
+          "apiBaseURL",
+          "identities"
+        ]
       }
     },
     "metadata": {
@@ -302,13 +580,10 @@
     }
   },
   "required": [
-    "target",
-    "environment",
     "webBaseURL",
     "apiBaseURL",
-    "defaultIdentity",
     "identities",
-    "metadata"
-  ],
-  "additionalProperties": false
+    "target",
+    "environment"
+  ]
 }

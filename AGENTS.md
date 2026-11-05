@@ -24,6 +24,8 @@
 - 使用 Playwright 自动等待及 expect；不使用固定 sleep 或 networkidle 等待业务完成。
 - 页面操作和 API 封装只提取实际重复的能力，原生 Page/APIRequestContext 可直接使用。
 - 页面继承 BasePage 时必须定义 ready Locator，必要时覆盖 expectReady；通用操作/事件/组件先复用 shared/web 与 shared/components。
+- 单用例多角色/跨系统优先使用 apiSessions/browserSessions；输入 systems 显式绑定系统身份，API-only 不请求 browserSessions。清理顺序见 docs/sessions-and-systems.md。
+- 内嵌业务区域使用 BaseView + 原生 FrameLocator，明确每层作用域；不缓存易失效的 Frame/ElementHandle，不自动选第一个匹配 frame。
 - 唯一数据使用 shared/data/unique；依赖数据使用 fixture。创建后及时登记 cleanup。
 - 不自动重试写操作，不对 401/403 静默刷新登录态。
 - 不记录外部 Token/Cookie，不把运行输入或认证状态提交到代码库。

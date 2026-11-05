@@ -11,5 +11,5 @@ export type RequestOptions = Omit<NativeRequestOptions, 'method' | 'maxRedirects
 /** Runtime input and the selected identity own the API destination and credentials. */
 export type ApiContextOptions = Omit<
   NonNullable<Parameters<APIRequest['newContext']>[0]>,
-  'baseURL' | 'storageState' | 'extraHTTPHeaders'
+  'baseURL' | 'storageState' | 'extraHTTPHeaders' | 'httpCredentials' | 'clientCertificates'
 >;

@@ -1,0 +1,20 @@
+{
+  "target": "__TARGET_ID__",
+  "environment": "test",
+  "webBaseURL": "https://portal.example.com",
+  "apiBaseURL": "https://portal.example.com/api/",
+  "defaultIdentity": "applicant",
+  "identities": {
+    "applicant": { "storageState": "./applicant.json", "api": { "headers": { "Authorization": "Bearer EXTERNAL_PORTAL_TOKEN" } } }
+  },
+  "systems": {
+    "finance": {
+      "webBaseURL": "https://finance.example.com",
+      "apiBaseURL": "https://finance.example.com/api/",
+      "defaultIdentity": "reviewer",
+      "identities": {
+        "reviewer": { "storageState": "./reviewer.json", "api": { "headers": { "Authorization": "Bearer EXTERNAL_FINANCE_TOKEN" } } }
+      }
+    }
+  }
+}

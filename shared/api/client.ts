@@ -7,17 +7,24 @@ export type { ApiContextOptions, RequestOptions } from './types';
 export class ApiClient {
   private readonly baseURL: URL;
 
-  constructor(readonly context: APIRequestContext, baseURL: string) {
+  constructor(readonly context: APIRequestContext, baseURL: string, private readonly label?: string) {
     this.baseURL = new URL(baseURL.endsWith('/') ? baseURL : `${baseURL}/`);
   }
 
   async send(method: string, path: string, options: RequestOptions = {}): Promise<APIResponse> {
     const url = new URL(path, this.baseURL);
+    if (url.username || url.password) {
+      throw new Error('API request URLs must not contain credentials.');
+    }
     if (url.origin !== this.baseURL.origin) {
       throw new Error('ApiClient only accepts requests to its configured API origin.');
     }
     // No query strings, headers or bodies are included in the framework step title.
-    return test.step(`API ${method.toUpperCase()} ${url.pathname}`, () => this.context.fetch(url.href, {
+    const verb = method.toUpperCase();
+    if (!['GET', 'HEAD', 'OPTIONS'].includes(verb) && (options.maxRetries ?? 0) !== 0) {
+      throw new Error('Automatic retries are not allowed for write requests.');
+    }
+    return test.step(`API${this.label ? ` [${this.label}]` : ''} ${verb} ${url.pathname}`, () => this.context.fetch(url.href, {
       maxRetries: 0,
       ...options,
       method,

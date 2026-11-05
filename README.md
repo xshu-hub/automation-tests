@@ -16,7 +16,7 @@ npm test
 
 Linux 若缺少浏览器系统依赖，先执行 `npx playwright install-deps chromium`。
 
-默认执行本地 demo：自动启动本地事项管理服务，读取随附的假登录态，运行 API 与 Chromium 用例，然后关闭服务。默认端口为 4173，执行前应为空闲状态。示例没有真实外部服务依赖。
+默认执行本地 demo：自动启动两个独立的本地事项管理服务，读取随附的假登录态，运行 API 与 Chromium 用例，然后关闭服务。端口 4173、4174 在执行前应为空闲状态。第二个服务验证多系统及跨 origin iframe；示例没有真实外部服务依赖。
 
 ```bash
 npm run test:api
@@ -38,8 +38,10 @@ npm test -- --help
 | 按 origin 注入 sessionStorage | shared/auth/browser-state.ts |
 | API 独立 Cookie、Authorization 等请求头 | apiContext fixture |
 | 身份切换、匿名上下文 | identity option / authState fixture |
+| 单用例多系统、多角色与资源收尾 | apiSessions / browserSessions，shared/sessions/ |
+| 多层 iframe 与嵌入业务视图 | shared/web/base-view.ts，原生 FrameLocator |
 | HTTP 方法、params、JSON、form、multipart、二进制 | shared/api/client.ts，保留原生请求选项 |
-| 状态码 + JSON Schema 校验 | shared/api/assertions.ts |
+| 状态码 + JSON/Zod 契约校验 | shared/api/assertions.ts |
 | 逆序清理、失败后继续清理 | shared/data/cleanup.ts |
 | 唯一数据名 | shared/data/unique.ts |
 | 页面就绪、导航状态、操作、事件同步、文件、存储和截图 | shared/web/ |
@@ -48,7 +50,11 @@ npm test -- --help
 | HTML、JUnit、JSON、失败截图、失败 Trace | 公共配置 |
 | 新项目模板与命令 | templates/target、scripts/create-target.ts |
 
-API 用例只使用 api/apiContext 时不会启动 Chromium。浏览器与 API 使用独立上下文；API 请求头不注入浏览器。用例可直接使用 Playwright 原生能力，不需要层层包装。
+API 用例只使用 api/apiContext/apiSessions 时不会启动 Chromium。浏览器与 API 使用独立上下文；API 请求头不注入浏览器。用例可直接使用 Playwright 原生能力，不需要层层包装。
+
+先从[能力索引](docs/capabilities.md)选择入口；多角色与跨系统流程见[会话指南](docs/sessions-and-systems.md)，复杂嵌入页面见[多层 iframe 与视图](docs/frames-and-views.md)。旧的单系统输入和 fixtures 用法保持兼容。
+
+读取表格、表单值和局部 HTML 见 [DOM 数据读取](docs/dom-reading.md)。当前使用原生 Locator/evaluate，未实现虚拟列表的通用全量采集器。
 
 ## 目录
 

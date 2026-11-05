@@ -60,7 +60,9 @@ test('页面能搜索到创建的用户', async ({ api, page, cleanup }) => {
 ## 多身份
 
 同一文件中用 test.describe + test.use({ identity: 'reader' }) 划分测试组。
-若一个用例需要同时使用多身份，可从 runtime 调用 resolveIdentity，显式创建两个 browser.newContext（传入各自 storageState）、newPage 后调用 injectSessionStorage(page, state.sessionStorage)，再访问应用，使用 finally 关闭。登录态仍必须由外部提供。
+若一个用例需要同时使用多身份，优先使用 apiSessions/browserSessions；输入 systems 描述附加系统。登录态仍必须由外部提供。具体 API、共享浏览器会话、清理顺序与报告边界见[多系统与多角色会话](sessions-and-systems.md)。手动创建原生 context 时，由调用方负责注入和释放。
+
+多层 iframe 的业务区域使用 BaseView，避免重复写 frame 路径或让内嵌表单承担顶层导航。见[嵌入视图指南](frames-and-views.md)和[能力索引](capabilities.md)。
 
 ## 修改公共能力
 

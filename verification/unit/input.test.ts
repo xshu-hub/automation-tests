@@ -1,9 +1,11 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, writeFileSync, rmSync } from 'node:fs';
+import { mkdtempSync, writeFileSync, rmSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
-import { loadRuntime, normalizeIdentity, resolveIdentity } from '../../shared/input/load';
+import { loadRuntime, normalizeIdentity, resolveIdentity, resolveSystem } from '../../shared/input/load';
+import { z } from 'zod';
+import { runtimeSchema } from '../../shared/input/schema';
 
 const original = {
   target: 'crm', environment: 'test',
@@ -11,6 +13,50 @@ const original = {
   defaultIdentity: 'admin',
   identities: { admin: { api: { headers: { Authorization: 'Bearer test-secret' } } } },
 };
+
+test('published JSON Schema matches accepted input and keeps defaulted fields optional', () => {
+  const schema = z.toJSONSchema(runtimeSchema, { io: 'input' });
+  const published = JSON.parse(readFileSync(new URL('../../docs/runtime.schema.json', import.meta.url), 'utf8'));
+  assert.deepEqual(published, schema);
+  for (const field of ['systems', 'metadata', 'defaultIdentity']) assert.ok(!schema.required?.includes(field));
+  assert.deepEqual(runtimeSchema.parse(original).systems, {});
+});
+
+test('additional systems resolve their own identities and relative state files without fallback', (t) => {
+  const { file, dir } = fixture(t, { ...original, systems: { billing: {
+    webBaseURL: 'https://billing.example.com', apiBaseURL: 'https://billing.example.com/api/',
+    defaultIdentity: 'admin', identities: { admin: {
+      storageState: './billing.json', api: { headers: { Authorization: 'Bearer billing-only' } },
+      sessionStorage: { 'https://BILLING.example.com:443/': { tenant: 'billing' } },
+    } },
+  } } });
+  writeFileSync(resolve(dir, 'billing.json'), JSON.stringify({ cookies: [], origins: [] }));
+  const runtime = loadRuntime(file);
+  assert.equal(resolveSystem(runtime).webBaseURL, original.webBaseURL);
+  const state = resolveIdentity(runtime, 'admin', 'billing');
+  assert.equal(state.api.headers.Authorization, 'Bearer billing-only');
+  assert.deepEqual(state.sessionStorage, { 'https://billing.example.com': { tenant: 'billing' } });
+  state.api.headers.Authorization = 'changed';
+  assert.equal(resolveIdentity(runtime, 'admin', 'billing').api.headers.Authorization, 'Bearer billing-only');
+  assert.equal(resolveIdentity(runtime, 'admin').api.headers.Authorization, 'Bearer test-secret');
+  assert.deepEqual(resolveIdentity(runtime, 'anonymous', 'billing').api.headers, {});
+  assert.throws(() => resolveIdentity(runtime, 'anonymous', 'missing'), /No external configuration/);
+  assert.throws(() => resolveIdentity(runtime, 'reader', 'billing'), /No external login state/);
+});
+
+test('additional system validation rejects reserved names and hides sensitive origin keys', (t) => {
+  const { file } = fixture(t, { ...original, systems: { default: original } });
+  assert.throws(() => loadRuntime(file), /Invalid external runtime input/);
+  const invalid = fixture(t, { ...original, systems: { billing: { ...original, identities: { admin: {
+    sessionStorage: { 'https://user:hidden-system-secret@billing.example.com': { token: 'hidden-value' } },
+  } } } } });
+  assert.throws(() => loadRuntime(invalid.file), (error: unknown) => {
+    assert.ok(error instanceof Error);
+    assert.match(error.message, /systems.billing.identities.admin.sessionStorage.<origin>/);
+    assert.ok(!error.message.includes('hidden-system-secret'));
+    return true;
+  });
+});
 
 function fixture(t: { after: (fn: () => void) => void }, value: unknown = original) {
   const dir = mkdtempSync(resolve(tmpdir(), 'automation-input-'));
@@ -187,4 +233,16 @@ test('invalid origin keys do not expose embedded credentials in validation error
     assert.ok(!error.message.includes('hidden-token'));
     return true;
   });
+});
+
+test('native storage rejects duplicate canonical origins in inline and file states', (t) => {
+  const state = { cookies: [], origins: [
+    { origin: 'https://web.example.com', localStorage: [{ name: 'token', value: 'one' }] },
+    { origin: 'https://WEB.example.com:443/', localStorage: [{ name: 'token', value: 'two' }] },
+  ] };
+  assert.throws(() => normalizeIdentity({ storageState: state }), /invalid external login state/);
+  assert.throws(() => normalizeIdentity({ api: { storageState: state } }), /invalid external login state/);
+  const { file, dir } = fixture(t, { ...original, identities: { admin: { storageState: './duplicate.json' } } });
+  writeFileSync(resolve(dir, 'duplicate.json'), JSON.stringify(state));
+  assert.throws(() => resolveIdentity(loadRuntime(file), 'admin'), /Invalid Playwright storageState/);
 });

@@ -163,6 +163,24 @@
       }
     }
   },
+  "systems": {
+    "secondary": {
+      "webBaseURL": "http://127.0.0.1:4174",
+      "apiBaseURL": "http://127.0.0.1:4174/api/",
+      "defaultIdentity": "reader",
+      "identities": {
+        "reader": {
+          "api": { "headers": { "Authorization": "Bearer demo-reader" } },
+          "storageState": {
+            "cookies": [{ "name": "demo_session", "value": "demo-reader", "domain": "127.0.0.1", "path": "/", "expires": -1, "httpOnly": true, "secure": false, "sameSite": "Lax" }],
+            "origins": []
+          },
+          "sessionStorage": { "http://127.0.0.1:4174": { "demo_tenant": "secondary-tenant" } }
+        },
+        "admin": { "api": { "headers": { "Authorization": "Bearer demo-admin" } } }
+      }
+    }
+  },
   "metadata": {
     "description": "Local demonstration only; all credentials are fake."
   }

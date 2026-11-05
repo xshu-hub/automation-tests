@@ -1,9 +1,12 @@
-import { request, test as base, expect, type APIRequestContext } from '@playwright/test';
+import { test as base, expect, type APIRequestContext } from '@playwright/test';
 import { ApiClient } from '../api/client';
+import { createApiContext } from '../api/context';
 import { injectSessionStorage } from '../auth/browser-state';
 import { CleanupStack } from '../data/cleanup';
 import { loadRuntime, resolveIdentity, type ResolvedIdentity, type RuntimeContext } from '../input/load';
 import type { ApiContextOptions } from '../api/types';
+import { ApiSessions } from '../sessions/api-sessions';
+import { BrowserSessions } from '../sessions/browser-sessions';
 
 export interface BaseOptions {
   identity: string;
@@ -15,6 +18,8 @@ interface BaseFixtures {
   apiContext: APIRequestContext;
   api: ApiClient;
   cleanup: CleanupStack;
+  apiSessions: ApiSessions;
+  browserSessions: BrowserSessions;
 }
 
 interface WorkerFixtures {
@@ -46,16 +51,7 @@ export const test = base.extend<BaseOptions & BaseFixtures, WorkerFixtures>({
   },
 
   apiContext: async ({ runtime, authState, apiOptions }, use) => {
-    const context = await request.newContext({
-      failOnStatusCode: false,
-      timeout: 15_000,
-      ignoreHTTPSErrors: false,
-      maxRedirects: 0,
-      ...apiOptions,
-      baseURL: runtime.apiBaseURL.endsWith('/') ? runtime.apiBaseURL : `${runtime.apiBaseURL}/`,
-      storageState: authState.api.storageState,
-      extraHTTPHeaders: authState.api.headers,
-    });
+    const context = await createApiContext(runtime.apiBaseURL, authState.api, apiOptions);
     try {
       await use(context);
     } finally {
@@ -67,7 +63,18 @@ export const test = base.extend<BaseOptions & BaseFixtures, WorkerFixtures>({
     await use(new ApiClient(apiContext, runtime.apiBaseURL));
   },
 
-  cleanup: async ({ apiContext: _apiContext }, use) => {
+  apiSessions: async ({ runtime, apiOptions }, use) => {
+    const sessions = new ApiSessions(runtime, apiOptions);
+    try { await use(sessions); } finally { await sessions.dispose(); }
+  },
+
+  // Declared API dependency keeps all named API sessions alive during browser cleanup.
+  browserSessions: async ({ runtime, browser, apiSessions: _apiSessions }, use) => {
+    const sessions = new BrowserSessions(runtime, browser);
+    try { await use(sessions); } finally { await sessions.dispose(); }
+  },
+
+  cleanup: async ({ apiContext: _apiContext, apiSessions: _apiSessions }, use) => {
     const stack = new CleanupStack();
     try {
       await use(stack);

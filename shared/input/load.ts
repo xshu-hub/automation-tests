@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import type { BrowserContextOptions } from '@playwright/test';
-import { identitySchema, runtimeSchema, storageStateSchema, type IdentityInput, type RuntimeInput } from './schema';
+import { identitySchema, runtimeSchema, storageStateSchema, type IdentityInput, type RuntimeInput, type SystemInput } from './schema';
 
 export type StorageState = Exclude<NonNullable<BrowserContextOptions['storageState']>, string>;
 
@@ -53,7 +53,7 @@ export function loadRuntime(inputFile: string, expectedTarget?: string): Runtime
   if (!result.success) {
     // Report field locations only; input values may contain credentials.
     const fields = result.error.issues.map((issue) => issue.path.map((part, index) =>
-      index === 3 && issue.path[2] === 'sessionStorage' ? '<origin>' : part,
+      index > 0 && issue.path[index - 1] === 'sessionStorage' ? '<origin>' : part,
     ).join('.') || '<root>').join(', ');
     throw new Error(`Invalid external runtime input. Check fields: ${fields}`);
   }
@@ -64,6 +64,11 @@ export function loadRuntime(inputFile: string, expectedTarget?: string): Runtime
     ...result.data,
     identities: Object.fromEntries(Object.entries(result.data.identities)
       .map(([name, identity]) => [name, normalizeParsedIdentity(identity)])),
+    systems: Object.fromEntries(Object.entries(result.data.systems).map(([name, system]) => [name, {
+      ...system,
+      identities: Object.fromEntries(Object.entries(system.identities)
+        .map(([identityName, identity]) => [identityName, normalizeParsedIdentity(identity)])),
+    }])),
     inputFile: absolutePath,
   };
 }
@@ -78,13 +83,21 @@ function readState(value: IdentityInput['storageState'], baseDirectory: string):
   return normalizeState(result.data);
 }
 
-export function resolveIdentity(runtime: RuntimeContext, name: string): ResolvedIdentity {
+export function resolveSystem(runtime: RuntimeContext, name = 'default'): SystemInput {
+  if (name === 'default') return runtime;
+  const system = Object.hasOwn(runtime.systems, name) ? runtime.systems[name] : undefined;
+  if (!system) throw new Error(`No external configuration for system "${name}".`);
+  return system;
+}
+
+export function resolveIdentity(runtime: RuntimeContext, name: string, systemName = 'default'): ResolvedIdentity {
+  const system = resolveSystem(runtime, systemName);
   // "anonymous" deliberately creates a fresh context without inherited credentials.
   if (name === 'anonymous') {
     return { storageState: { cookies: [], origins: [] }, sessionStorage: {},
       api: { headers: {}, storageState: { cookies: [], origins: [] } } };
   }
-  const identity = Object.hasOwn(runtime.identities, name) ? runtime.identities[name] : undefined;
+  const identity = Object.hasOwn(system.identities, name) ? system.identities[name] : undefined;
   if (!identity) throw new Error(`No external login state for identity "${name}".`);
   if (identity.expiresAt && Date.parse(identity.expiresAt) <= Date.now()) {
     throw new Error(`External login state for "${name}" has expired. Supply fresh state externally.`);

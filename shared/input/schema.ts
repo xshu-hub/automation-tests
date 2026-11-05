@@ -36,7 +36,18 @@ export const storageStateSchema = z.object({
     origin: httpOrigin,
     localStorage: z.array(z.object({ name: z.string(), value: z.string() })),
   }).passthrough()),
-}).passthrough();
+}).passthrough().superRefine((state, context) => {
+  const origins = new Set<string>();
+  for (const entry of state.origins) {
+    if (!URL.canParse(entry.origin)) continue; // The field schema reports invalid URLs.
+    const canonical = new URL(entry.origin).origin;
+    if (origins.has(canonical)) {
+      context.addIssue({ code: 'custom', message: 'Supply only one storageState entry per origin', path: ['origins'] });
+      return;
+    }
+    origins.add(canonical);
+  }
+});
 
 export const identitySchema = z.object({
   storageState: z.union([z.string().min(1), storageStateSchema]).optional(),
@@ -48,15 +59,21 @@ export const identitySchema = z.object({
   expiresAt: z.iso.datetime({ offset: true }).optional(),
 });
 
-export const runtimeSchema = z.object({
-  target: z.string().regex(/^[a-z0-9][a-z0-9-]*$/),
-  environment: z.string().regex(/^[a-zA-Z0-9_-]+$/),
+export const systemSchema = z.object({
   webBaseURL: baseURL,
   apiBaseURL: baseURL,
   defaultIdentity: z.string().min(1).default('default'),
   identities: z.record(z.string().min(1), identitySchema),
+});
+
+export const runtimeSchema = systemSchema.extend({
+  target: z.string().regex(/^[a-z0-9][a-z0-9-]*$/),
+  environment: z.string().regex(/^[a-zA-Z0-9_-]+$/),
+  // The root system remains the implicit "default" for backwards compatibility.
+  systems: z.record(z.string().regex(/^(?!default$)[a-z0-9][a-z0-9-]{0,127}$/), systemSchema).default({}),
   metadata: z.record(z.string(), z.unknown()).default({}),
 });
 
 export type RuntimeInput = z.infer<typeof runtimeSchema>;
 export type IdentityInput = z.infer<typeof identitySchema>;
+export type SystemInput = z.infer<typeof systemSchema>;

@@ -2,6 +2,8 @@
 
 页面基类统一导航与页面就绪，其他能力通过组合暴露。实现参考 CodeceptJS 的能力分组和 Serenity/JS 的父子组件作用域，继续使用原生 Playwright Locator 和等待。
 
+嵌入业务区域可使用 BaseView；多层 iframe、动态替换和跨文档浮层的组织方式见[多层 iframe 与嵌入视图](frames-and-views.md)。多角色页面使用[具名浏览器会话](sessions-and-systems.md)。
+
 ## BasePage
 
 ```typescript
@@ -73,12 +75,14 @@ popup 返回原生 Page，调用方负责目标页面就绪。JS alert/confirm/p
 | 组件 | 作用与边界 |
 | --- | --- |
 | `Form` | 在表单根内按 label 填写、勾选、原生 select 与提交；提交后业务结果由用例检查 |
-| `Table` | 语义 table 内按单元格找行、按列下标取 cell；保持重复匹配报错 |
+| `Table` | HTML table / ARIA grid 内按 cell 或 gridcell 找行，按非负整数列下标取单元格；在各匹配行内选列，重复行仍保持严格匹配 |
 | `Pagination` | 显式注入 previous/next/current，点击后等待页码实际变化 |
 | `Modal` | 显式注入 dialog 根和关闭按钮，检查打开与关闭 |
 | `SingleSelect` | 显式注入 trigger 与 listbox，支持被挂到 body 的 portal 浮层 |
 
 这些组件定义语义/定位契约，不内置 Element Plus、Ant Design 等库的 CSS。不同 UI 库在各项目组件中适配 Locator，页面组合需要的组件。可运行的完整组合见 `targets/demo/pages/playground.page.ts`。
+
+Table 面向平面行列结构；嵌套表格、rowheader、合并单元格的逻辑列映射和虚拟滚动需项目适配。读取 DOM、表格当前数据与 iframe 作用域见 [DOM 数据读取](dom-reading.md)。
 
 ## 外部 sessionStorage 的一次性注入
 

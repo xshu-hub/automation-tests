@@ -1,4 +1,18 @@
 import { test, expect } from '../../fixtures';
+import { Table } from '../../../../shared/components/table';
+
+test('Table 同时识别 ARIA gridcell，保持同名行严格匹配', async ({ page }) => {
+  await page.setContent(`<div role="grid" aria-label="订单">
+    <div role="row"><div role="columnheader">姓名</div><div role="columnheader">状态</div></div>
+    <div role="row"><div role="gridcell">Alice</div><div role="gridcell">待审批</div></div>
+    <div role="row"><div role="gridcell">Bob</div><div role="gridcell">完成</div></div>
+  </div>`);
+  const table = new Table(page.getByRole('grid', { name: '订单' }));
+  await expect(table.rows).toHaveCount(2);
+  await expect(table.cell('Alice', 1)).toHaveText('待审批');
+  await table.root.evaluate(root => root.append(root.children[1].cloneNode(true)));
+  await expect(table.cell('Alice', 1).innerText()).rejects.toThrow(/strict mode violation/);
+});
 
 test('Form通过自身根定位字段与提交按钮，不影响同名备用表单', async ({ page, playgroundPage: app }) => {
   await app.open();
