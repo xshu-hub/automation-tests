@@ -1,0 +1,169 @@
+{
+  "target": "demo",
+  "environment": "local",
+  "webBaseURL": "http://127.0.0.1:4173",
+  "apiBaseURL": "http://127.0.0.1:4173/api/",
+  "defaultIdentity": "admin",
+  "identities": {
+    "admin": {
+      "storageState": {
+        "cookies": [
+          {
+            "name": "demo_session",
+            "value": "demo-admin",
+            "domain": "127.0.0.1",
+            "path": "/",
+            "expires": -1,
+            "httpOnly": true,
+            "secure": false,
+            "sameSite": "Lax"
+          }
+        ],
+        "origins": [
+          {
+            "origin": "http://127.0.0.1:4173",
+            "localStorage": [
+              {
+                "name": "demo_user",
+                "value": "admin"
+              }
+            ]
+          }
+        ]
+      },
+      "sessionStorage": {
+        "http://127.0.0.1:4173": {
+          "demo_tenant": "local-tenant"
+        }
+      },
+      "api": {
+        "headers": {
+          "Authorization": "Bearer demo-admin"
+        }
+      }
+    },
+    "reader": {
+      "storageState": {
+        "cookies": [
+          {
+            "name": "demo_session",
+            "value": "demo-reader",
+            "domain": "127.0.0.1",
+            "path": "/",
+            "expires": -1,
+            "httpOnly": true,
+            "secure": false,
+            "sameSite": "Lax"
+          }
+        ],
+        "origins": [
+          {
+            "origin": "http://127.0.0.1:4173",
+            "localStorage": [
+              {
+                "name": "demo_user",
+                "value": "reader"
+              }
+            ]
+          }
+        ]
+      },
+      "sessionStorage": {
+        "http://127.0.0.1:4173": {
+          "demo_tenant": "local-tenant"
+        }
+      },
+      "api": {
+        "headers": {
+          "Authorization": "Bearer demo-reader"
+        }
+      }
+    },
+    "cookie-only": {
+      "storageState": {
+        "cookies": [
+          {
+            "name": "demo_session",
+            "value": "demo-admin",
+            "domain": "127.0.0.1",
+            "path": "/",
+            "expires": -1,
+            "httpOnly": true,
+            "secure": false,
+            "sameSite": "Lax"
+          }
+        ],
+        "origins": []
+      }
+    },
+    "header-only": {
+      "api": {
+        "headers": {
+          "Authorization": "Bearer demo-admin"
+        }
+      }
+    },
+    "split-cookie": {
+      "storageState": {
+        "cookies": [
+          {
+            "name": "demo_session",
+            "value": "demo-admin",
+            "domain": "127.0.0.1",
+            "path": "/",
+            "expires": -1,
+            "httpOnly": true,
+            "secure": false,
+            "sameSite": "Lax"
+          }
+        ],
+        "origins": [
+          {
+            "origin": "http://127.0.0.1:4173",
+            "localStorage": [
+              {
+                "name": "demo_user",
+                "value": "admin"
+              }
+            ]
+          }
+        ]
+      },
+      "sessionStorage": {
+        "http://127.0.0.1:4173": {
+          "demo_tenant": "local-tenant"
+        }
+      },
+      "api": {
+        "storageState": {
+          "cookies": [
+            {
+              "name": "demo_session",
+              "value": "demo-reader",
+              "domain": "127.0.0.1",
+              "path": "/",
+              "expires": -1,
+              "httpOnly": true,
+              "secure": false,
+              "sameSite": "Lax"
+            }
+          ],
+          "origins": [
+            {
+              "origin": "http://127.0.0.1:4173",
+              "localStorage": [
+                {
+                  "name": "demo_user",
+                  "value": "reader"
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
+  },
+  "metadata": {
+    "description": "Local demonstration only; all credentials are fake."
+  }
+}

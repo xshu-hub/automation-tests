@@ -1,0 +1,128 @@
+{
+  "version": "0.1.1",
+  "verified_at_utc": "2026-11-05T14:33:22.294320+00:00",
+  "original_zip_sha256": "adc996fe04e6fadb7f17f44cc3c4d9a08d8489149d21f167eb6f2356eb76dc1a",
+  "original_zip_and_pristine_source_unchanged": true,
+  "environment": {
+    "os": "Windows 11 22631",
+    "node": "22.23.4",
+    "npm": "10.9.9",
+    "playwright": "1.64.1",
+    "browser": "Existing Chrome 156.0.8078.80 (Chromium engine)"
+  },
+  "validation": {
+    "typecheck": "passed",
+    "eslint": "passed",
+    "unit": "39/39",
+    "demo_api_web": "45/45",
+    "browser_state": "5/5",
+    "real_interruption": "6/6",
+    "api_with_invalid_browser_path": "23/23",
+    "intentional_failure_artifacts_and_cleanup": "passed"
+  },
+  "changed_original_files": [
+    ".github/workflows/tests.yml",
+    "AGENTS.md",
+    "README.md",
+    "docs/validation.md",
+    "package-lock.json",
+    "package.json",
+    "scripts/launch.ts",
+    "scripts/run.ts",
+    "verification/unit/launcher.test.ts"
+  ],
+  "interruption_scenarios": [
+    {
+      "scenario": "SIGINT",
+      "launcher": {
+        "pid": 15448,
+        "startedAt": "2026-11-05T14:29:53.757Z",
+        "state": "exited",
+        "interruptedBy": "SIGINT",
+        "forced": false,
+        "exitCode": 130,
+        "terminationError": null
+      },
+      "observed_process_count": 17,
+      "observed_chromium_process_count": 8,
+      "all_observed_processes_exited": true,
+      "external_test_resources_after_stop": 0,
+      "verifier_emergency_cleanup_after_forced_stop": false,
+      "complete_native_reports_verified": true,
+      "partial_output_preserved": true,
+      "prior_attempt_preserved": true,
+      "local_evidence": "C:\\Users\\Administrator\\Documents\\Codex\\2026-11-05\\task-2\\audit\\work\\automation-tests\\artifacts\\interruption-308907cf\\verification\\verify-interruption-9e975ce7-d183-4e9a-8145-d1e4d90d51ef\\240bdaa1-bbc4-437b-b4e7-83357bf75bf5"
+    },
+    {
+      "scenario": "SIGTERM",
+      "launcher": {
+        "pid": 3504,
+        "startedAt": "2026-11-05T14:29:56.856Z",
+        "state": "exited",
+        "interruptedBy": "SIGTERM",
+        "forced": false,
+        "exitCode": 143,
+        "terminationError": null
+      },
+      "observed_process_count": 17,
+      "observed_chromium_process_count": 8,
+      "all_observed_processes_exited": true,
+      "external_test_resources_after_stop": 0,
+      "verifier_emergency_cleanup_after_forced_stop": false,
+      "complete_native_reports_verified": true,
+      "partial_output_preserved": true,
+      "prior_attempt_preserved": true,
+      "local_evidence": "C:\\Users\\Administrator\\Documents\\Codex\\2026-11-05\\task-2\\audit\\work\\automation-tests\\artifacts\\interruption-0f3f9b54\\verification\\verify-interruption-1dabf4aa-8700-4f46-815a-0a459ea71324\\f017ffc0-1e0a-4b80-b5f0-ef45cd402120"
+    },
+    {
+      "scenario": "deadline",
+      "launcher": {
+        "pid": 24620,
+        "startedAt": "2026-11-05T14:30:01.233Z",
+        "state": "exited",
+        "interruptedBy": "SIGINT",
+        "forced": true,
+        "exitCode": 130,
+        "terminationError": null
+      },
+      "observed_process_count": 17,
+      "observed_chromium_process_count": 8,
+      "all_observed_processes_exited": true,
+      "external_test_resources_after_stop": 1,
+      "verifier_emergency_cleanup_after_forced_stop": true,
+      "complete_native_reports_verified": false,
+      "partial_output_preserved": true,
+      "prior_attempt_preserved": true,
+      "local_evidence": "C:\\Users\\Administrator\\Documents\\Codex\\2026-11-05\\task-2\\audit\\work\\automation-tests\\artifacts\\interruption-e7a5fe46\\verification\\verify-interruption-9ce1a1bd-18c9-4c91-97f5-bb88ef7ae29e\\6ba0caac-53d9-43fd-8c29-2371ba481d91"
+    },
+    {
+      "scenario": "second-interrupt",
+      "launcher": {
+        "pid": 16724,
+        "startedAt": "2026-11-05T14:30:05.814Z",
+        "state": "exited",
+        "interruptedBy": "SIGINT",
+        "forced": true,
+        "exitCode": 130,
+        "terminationError": null
+      },
+      "observed_process_count": 17,
+      "observed_chromium_process_count": 8,
+      "all_observed_processes_exited": true,
+      "external_test_resources_after_stop": 1,
+      "verifier_emergency_cleanup_after_forced_stop": true,
+      "complete_native_reports_verified": false,
+      "partial_output_preserved": true,
+      "prior_attempt_preserved": true,
+      "local_evidence": "C:\\Users\\Administrator\\Documents\\Codex\\2026-11-05\\task-2\\audit\\work\\automation-tests\\artifacts\\interruption-24da61ab\\verification\\verify-interruption-8aa63341-090a-4582-b601-88995285770a\\1d886dfd-8f05-457e-b9d3-a9b992c37351"
+    }
+  ],
+  "limits": [
+    "Only Windows was executed in this environment. Linux/POSIX and Node version matrix are configured in CI but not run here.",
+    "Matching Playwright bundled Chromium was not installed or tested.",
+    "Cooperative IPC cancellation and the signal handling path were exercised; a physical interactive Ctrl+C keypress was not automated.",
+    "Forced termination cannot guarantee fixture cleanup or complete native reports. The force probes explicitly retain blocked test resources before verifier emergency cleanup.",
+    "Real business systems and long-running stability were not tested."
+  ],
+  "evidence_directory": "C:\\Users\\Administrator\\Documents\\Codex\\2026-11-05\\task-2\\audit\\evidence"
+}

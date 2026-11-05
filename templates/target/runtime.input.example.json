@@ -1,0 +1,13 @@
+{
+  "target": "__TARGET_ID__",
+  "environment": "test",
+  "webBaseURL": "https://web.example.com",
+  "apiBaseURL": "https://api.example.com/api/",
+  "defaultIdentity": "admin",
+  "identities": {
+    "admin": {
+      "storageState": "./admin.storage-state.json",
+      "api": { "headers": { "Authorization": "Bearer REPLACE_WITH_EXTERNAL_STATE" } }
+    }
+  }
+}

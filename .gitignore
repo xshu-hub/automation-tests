@@ -1,0 +1,10 @@
+node_modules/
+artifacts/
+.runtime/
+.auth/
+.env
+.env.*
+!.env.example
+*.tsbuildinfo
+playwright-report/
+test-results/

@@ -1,0 +1,33 @@
+name: Automation framework checks
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  verify:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        node: ['22.13.0', '24']
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install chromium
+      - if: runner.os == 'Linux'
+        run: npx playwright install-deps chromium
+      - run: npm run check
+      - run: npm test -- -- --workers=2
+      - run: npm run verify:state
+      - run: npm run verify:failure
+      - run: npm run verify:interrupt
+      # Real target inputs/authentication are prepared by external orchestration.
+      # Demo artifacts are not uploaded automatically; real traces may contain credentials.
